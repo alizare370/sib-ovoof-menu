@@ -1,33 +1,34 @@
 /* Design philosophy: editorial food branding — cream paper canvas, saffron signature accents, olive structure, asymmetric menu layout. */
 import { useMemo, useState } from "react";
 import { Search, ShoppingBag, Plus, Minus, X, Clock3, MapPin, Phone, ArrowLeft, Sparkles, Utensils, Soup, Sandwich, CupSoda } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 type Category = "همه" | "ساندویچ‌ها" | "سوخاری‌ها" | "نوشیدنی‌ها";
-type Product = { id: number; name: string; price: number; category: Exclude<Category, "همه">; image?: string; featured?: boolean; note?: string };
+type Product = { id: number; productKey: string; name: string; price: number; category: Exclude<Category, "همه">; image?: string; featured?: boolean; note?: string };
 
 const products: Product[] = [
-  { id: 1, name: "ساندویچ بندری", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", featured: true, note: "تند و پرملات" },
-  { id: 2, name: "ساندویچ هات داگ", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-hotdog_7e44294d.jpg", note: "با پنیر کش‌دار" },
-  { id: 3, name: "ساندویچ مخلوط", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", note: "انتخاب همه‌پسند" },
-  { id: 4, name: "ساندویچ همبرگر", price: 250, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", featured: true, note: "برگر داغ و آبدار" },
-  { id: 5, name: "فیله مرغ", price: 130, category: "سوخاری‌ها", image: "/manus-storage/ovoof-wings_a33a700a.jpg", featured: true, note: "تردِ طلایی" },
-  { id: 6, name: "کتف بال", price: 80, category: "سوخاری‌ها", image: "/manus-storage/ovoof-wings_a33a700a.jpg" },
-  { id: 7, name: "توپک پنیری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
-  { id: 8, name: "پنیر سوخاری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
-  { id: 9, name: "پیاز سوخاری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
-  { id: 10, name: "کراکت مرغ", price: 60, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
-  { id: 11, name: "کوردن بلو", price: 95, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg", note: "ویژه اوووففف" },
-  { id: 12, name: "قارچ سوخاری یک پرس", price: 140, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
-  { id: 13, name: "قارچ سوخاری نصف پرس", price: 70, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
-  { id: 14, name: "سیب‌زمینی یک پرس", price: 130, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
-  { id: 15, name: "سیب‌زمینی نصف پرس", price: 65, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
-  { id: 16, name: "سیب‌زمینی با قارچ و پنیر", price: 200, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg", featured: true, note: "پیشنهاد اوووففف" },
-  { id: 17, name: "هات داگ سرخ شده", price: 120, category: "سوخاری‌ها", image: "/manus-storage/ovoof-hotdog_7e44294d.jpg" },
-  { id: 18, name: "کوکتل سرخ شده", price: 80, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
-  { id: 19, name: "نوشابه بطری", price: 60, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
-  { id: 20, name: "نوشابه شیشه‌ای", price: 70, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
-  { id: 21, name: "دلستر شیشه‌ای", price: 80, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
-  { id: 22, name: "نوشیدنی‌های قوطی", price: 90, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
+  { id: 1, productKey: "menu-1", name: "ساندویچ بندری", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", featured: true, note: "تند و پرملات" },
+  { id: 2, productKey: "menu-2", name: "ساندویچ هات داگ", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-hotdog_7e44294d.jpg", note: "با پنیر کش‌دار" },
+  { id: 3, productKey: "menu-3", name: "ساندویچ مخلوط", price: 220, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", note: "انتخاب همه‌پسند" },
+  { id: 4, productKey: "menu-4", name: "ساندویچ همبرگر", price: 250, category: "ساندویچ‌ها", image: "/manus-storage/ovoof-sandwich_4aa3c590.jpg", featured: true, note: "برگر داغ و آبدار" },
+  { id: 5, productKey: "menu-5", name: "فیله مرغ", price: 130, category: "سوخاری‌ها", image: "/manus-storage/ovoof-wings_a33a700a.jpg", featured: true, note: "تردِ طلایی" },
+  { id: 6, productKey: "menu-6", name: "کتف بال", price: 80, category: "سوخاری‌ها", image: "/manus-storage/ovoof-wings_a33a700a.jpg" },
+  { id: 7, productKey: "menu-7", name: "توپک پنیری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
+  { id: 8, productKey: "menu-8", name: "پنیر سوخاری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
+  { id: 9, productKey: "menu-9", name: "پیاز سوخاری", price: 30, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
+  { id: 10, productKey: "menu-10", name: "کراکت مرغ", price: 60, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
+  { id: 11, productKey: "menu-11", name: "کوردن بلو", price: 95, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg", note: "ویژه اوووففف" },
+  { id: 12, productKey: "menu-12", name: "قارچ سوخاری یک پرس", price: 140, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
+  { id: 13, productKey: "menu-13", name: "قارچ سوخاری نصف پرس", price: 70, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
+  { id: 14, productKey: "menu-14", name: "سیب‌زمینی یک پرس", price: 130, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
+  { id: 15, productKey: "menu-15", name: "سیب‌زمینی نصف پرس", price: 65, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg" },
+  { id: 16, productKey: "menu-16", name: "سیب‌زمینی با قارچ و پنیر", price: 200, category: "سوخاری‌ها", image: "/manus-storage/ovoof-potato_5b48b026.jpg", featured: true, note: "پیشنهاد اوووففف" },
+  { id: 17, productKey: "menu-17", name: "هات داگ سرخ شده", price: 120, category: "سوخاری‌ها", image: "/manus-storage/ovoof-hotdog_7e44294d.jpg" },
+  { id: 18, productKey: "menu-18", name: "کوکتل سرخ شده", price: 80, category: "سوخاری‌ها", image: "/manus-storage/ovoof-fried-platter_84311014.jpg" },
+  { id: 19, productKey: "menu-19", name: "نوشابه بطری", price: 60, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
+  { id: 20, productKey: "menu-20", name: "نوشابه شیشه‌ای", price: 70, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
+  { id: 21, productKey: "menu-21", name: "دلستر شیشه‌ای", price: 80, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
+  { id: 22, productKey: "menu-22", name: "نوشیدنی‌های قوطی", price: 90, category: "نوشیدنی‌ها", image: "/manus-storage/ovoof-drinks_7fc23616.jpg" },
 ];
 
 const categoryMeta = [
@@ -38,8 +39,11 @@ const categoryMeta = [
 ] as const;
 
 const formatPrice = (price: number) => new Intl.NumberFormat("fa-IR").format(price);
+const fallbackAsset = "/manus-storage/ovoof-fried-platter_84311014.jpg";
 
 export default function Home() {
+  const assets = trpc.assets.list.useQuery();
+  const assetMap = useMemo(() => new Map((assets.data ?? []).map((asset) => [asset.productKey, asset.fileUrl])), [assets.data]);
   const [category, setCategory] = useState<Category>("همه");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<Record<number, number>>({});
@@ -76,7 +80,7 @@ export default function Home() {
             <p>هر چیزی که باید از یک سوخاری خوب بدانی: طلایی، پرملات و درست همان‌قدر خوشمزه که فکرش را می‌کنی.</p>
             <div className="hero-actions"><a href="#menu" className="primary-cta">دیدن منوی خوشمزه <ArrowLeft size={17} /></a><span className="hero-note">پخت تازه، هر روز<br /><b>از ساعت ۱۱ تا ۲۳</b></span></div>
           </div>
-          <div className="hero-visual"><div className="hero-ring" /><img src="/manus-storage/ovoof-hero_5aeffec5.jpg" alt="سبد سوخاری طلایی و سیب‌زمینی" /><div className="hero-sticker"><Sparkles size={16} /><span>پیشنهاد<br /><b>اوووففف</b></span></div></div>
+          <div className="hero-visual"><div className="hero-ring" /><img src="/manus-storage/ovoof-hero_5aeffec5.jpg" alt="سبد سوخاری طلایی و سیب‌زمینی" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackAsset; }} /><div className="hero-sticker"><Sparkles size={16} /><span>پیشنهاد<br /><b>اوووففف</b></span></div></div>
         </section>
 
         <section className="quick-strip" aria-label="اطلاعات سریع"><div><Clock3 size={21} /><span><b>سریع و تازه</b><small>سفارش تو همین حالا آماده می‌شود</small></span></div><div><MapPin size={21} /><span><b>تهران، همین حوالی</b><small>موقعیت دقیق را از ما بپرس</small></span></div><div><Phone size={21} /><span><b>۰۲۱-۱۲۳۴۵۶۷۸</b><small>برای سفارش تلفنی</small></span></div></section>
@@ -86,12 +90,12 @@ export default function Home() {
           <div className="menu-content">
             <div className="menu-toolbar"><div className="category-tabs">{categoryMeta.map(({ label, icon: Icon, caption }) => <button key={label} className={category === label ? "active" : ""} onClick={() => setCategory(label)}><Icon size={17} /><span>{label}</span><small>{caption}</small></button>)}</div><label className="search-box"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="دنبال چی می‌گردی؟" aria-label="جست‌وجوی غذا" /></label></div>
             <div className="menu-heading"><div><span>{category === "همه" ? "همه انتخاب‌ها" : category}</span><b>{formatPrice(visibleProducts.length)} آیتم</b></div><span className="order-hint">برای اضافه‌کردن روی + بزن</span></div>
-            <div className="product-grid">{visibleProducts.map((product, index) => <article className={`product-card ${product.featured ? "featured" : ""}`} key={product.id} style={{ "--delay": `${index * 35}ms` } as React.CSSProperties}><div className="product-image"><img src={product.image} alt={product.name} loading="lazy" />{product.note && <span className="product-tag">{product.note}</span>}<button className="add-float" onClick={() => addToCart(product.id)} aria-label={`افزودن ${product.name}`}><Plus size={19} /></button></div><div className="product-info"><div><h3>{product.name}</h3><span>{product.category === "سوخاری‌ها" ? "تازه و ترد" : product.category === "ساندویچ‌ها" ? "با نان تازه" : "خنک و دلچسب"}</span></div><strong>{formatPrice(product.price)} <small>تومان</small></strong></div></article>)}</div>
+            <div className="product-grid">{visibleProducts.map((product, index) => <article className={`product-card ${product.featured ? "featured" : ""}`} key={product.id} style={{ "--delay": `${index * 35}ms` } as React.CSSProperties}><div className="product-image"><img src={assetMap.get(product.productKey) ?? product.image ?? fallbackAsset} alt={product.name} loading="lazy" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackAsset; }} />{product.note && <span className="product-tag">{product.note}</span>}<button className="add-float" onClick={() => addToCart(product.id)} aria-label={`افزودن ${product.name}`}><Plus size={19} /></button></div><div className="product-info"><div><h3>{product.name}</h3><span>{product.category === "سوخاری‌ها" ? "تازه و ترد" : product.category === "ساندویچ‌ها" ? "با نان تازه" : "خنک و دلچسب"}</span></div><strong>{formatPrice(product.price)} <small>تومان</small></strong></div></article>)}</div>
             {visibleProducts.length === 0 && <div className="empty-state"><Soup size={30} /><b>این یکی را پیدا نکردیم!</b><span>یک اسم دیگر را امتحان کن.</span></div>}
           </div>
         </section>
 
-        <section id="about" className="about-section"><div className="about-image"><img src="/manus-storage/ovoof-fried-platter_84311014.jpg" alt="بشقاب سوخاری‌های تازه" /></div><div className="about-copy"><div className="section-kicker">چرا اوووففف؟</div><h2>ما با <i>تردی</i><br />شوخی نداریم.</h2><p>از انتخاب مواد تازه تا آخرین لحظه‌ی سرخ‌شدن، همه‌چیز برای یک گازِ درست‌وحسابی وسواس‌گونه انتخاب می‌شود. نتیجه؟ همان «اوووففف»ی که بعد از اولین گاز از دهانت درمی‌آید.</p><div className="about-signature"><span className="signature-dot" /> ساخته‌شده با عشق، روغن تازه و کمی شیطنت</div></div></section>
+        <section id="about" className="about-section"><div className="about-image"><img src="/manus-storage/ovoof-fried-platter_84311014.jpg" alt="بشقاب سوخاری‌های تازه" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbackAsset; }} /></div><div className="about-copy"><div className="section-kicker">چرا اوووففف؟</div><h2>ما با <i>تردی</i><br />شوخی نداریم.</h2><p>از انتخاب مواد تازه تا آخرین لحظه‌ی سرخ‌شدن، همه‌چیز برای یک گازِ درست‌وحسابی وسواس‌گونه انتخاب می‌شود. نتیجه؟ همان «اوووففف»ی که بعد از اولین گاز از دهانت درمی‌آید.</p><div className="about-signature"><span className="signature-dot" /> ساخته‌شده با عشق، روغن تازه و کمی شیطنت</div></div></section>
       </main>
 
       <footer id="contact" className="footer"><div className="footer-brand"><span className="brand-mark"><img src="/manus-storage/ovoof-mark_52e8e115.png" alt="" /></span><b>سوخاری سیب اوووففف</b></div><span>هر روز، از ۱۱ صبح تا ۱۱ شب</span><span>برای سفارش: ۰۲۱-۱۲۳۴۵۶۷۸</span></footer>

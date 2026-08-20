@@ -1,0 +1,1 @@
+ALTER TABLE `menuAssets` ADD `productKey` varchar(160) NOT NULL;
